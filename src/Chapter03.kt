@@ -9,22 +9,30 @@ sealed class List<out A> {
         }
 
         fun <A, B> foldRight(xs: List<A>, z: B, f: (A, B) -> B): B =
-            when (xs) {
-                is Nil -> z
-                is Cons -> f(xs.head, foldRight(xs.tail, z, f))
-            }
+                when (xs) {
+                    is Nil -> z
+                    is Cons -> f(xs.head, foldRight(xs.tail, z, f))
+                }
 
-        tailrec fun <A, B> foldLeft(xs: List<A>, z: B, f: (B, A) -> B): B =
-            when (xs) {
+        tailrec fun <A, B> foldLeft(xs: List<A>, z: B, f: (B, A) -> B): B {
+            return when (xs) {
                 is Nil -> z
                 is Cons -> foldLeft(xs.tail, f(z, xs.head), f)
             }
-
-        fun <A, B> foldLeftR(xs: List<A>, z: B, f: (B, A) -> B): B =
-            foldRight(xs, { b: B -> b }) { a, g -> { b -> g(f(b, a)) } }(z)
+        }
 
         fun <A, B> foldRightL(xs: List<A>, z: B, f: (A, B) -> B): B =
-            foldLeft(xs, { b: B -> b }, { g, a -> { b -> g(f(a, b)) } })(z)
+                foldLeft(xs, { b: B -> b }) { g, a -> { g(f(a, it)) } }(z)
+
+        fun <A, B> foldLeftR(xs: List<A>, z: B, f: (B, A) -> B): B =
+                foldRight(xs, { b: B -> b }) { a, g -> { g(f(it, a)) } }(z)
+
+        fun <A, B> foldRightDemystified(list: List<A>, identity: B, combiner: (A, B) -> B): B {
+            val identityFunction: (B) -> B = { it }
+            val delayer: ((B) -> B, A) -> (B) -> B = { delayedExec, a -> { delayedExec(combiner(a, it)) } }
+            val chain = foldLeft(list, identityFunction, delayer)
+            return chain(identity)
+        }
 
         fun sum(ints: List<Int>): Int = foldRight(ints, 0) { a, b -> a + b }
 
@@ -33,16 +41,16 @@ sealed class List<out A> {
 }
 
 fun <A> List<A>.tail(): List<A> =
-    when (this) {
-        is Nil -> Nil
-        is Cons -> tail
-    }
+        when (this) {
+            is Nil -> Nil
+            is Cons -> tail
+        }
 
 fun <A> List<A>.setHead(a: A): List<A> =
-    when (this) {
-        is Nil -> Cons(a, Nil)
-        is Cons -> Cons(a, this)
-    }
+        when (this) {
+            is Nil -> Cons(a, Nil)
+            is Cons -> Cons(a, this)
+        }
 
 tailrec fun <A> List<A>.drop(numberOfElements: Int): List<A> {
     return if (numberOfElements <= 0 || this == Nil) this else this.tail().drop(numberOfElements - 1)
@@ -90,9 +98,11 @@ fun main() {
     println(myList.init())
 
     println(List.foldRight(myList, "") { number, acc -> acc + number })
-    println(List.foldLeft(myList, "") { str, num -> str + num})
+    println(List.foldLeft(myList, "") { str, num -> str + num })
     println(myList.append(List.of(5, 6, 7)))
 
-    val lists = List.of(myList, List.of(1,2))
+    val lists = List.of(myList, List.of(1, 2))
     println(lists.concat())
+
+    println(List.foldRightL(myList, "s") { x, s -> s + x })
 }
