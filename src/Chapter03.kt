@@ -14,12 +14,11 @@ sealed class List<out A> {
                     is Cons -> f(xs.head, foldRight(xs.tail, z, f))
                 }
 
-        tailrec fun <A, B> foldLeft(xs: List<A>, z: B, f: (B, A) -> B): B {
-            return when (xs) {
+        tailrec fun <A, B> foldLeft(xs: List<A>, z: B, f: (B, A) -> B): B =
+            when (xs) {
                 is Nil -> z
                 is Cons -> foldLeft(xs.tail, f(z, xs.head), f)
             }
-        }
 
         fun <A, B> foldRightL(xs: List<A>, z: B, f: (A, B) -> B): B =
                 foldLeft(xs, { b: B -> b }) { g, a -> { g(f(a, it)) } }(z)
