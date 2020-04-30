@@ -15,10 +15,10 @@ sealed class List<out A> {
                 }
 
         tailrec fun <A, B> foldLeft(xs: List<A>, z: B, f: (B, A) -> B): B =
-            when (xs) {
-                is Nil -> z
-                is Cons -> foldLeft(xs.tail, f(z, xs.head), f)
-            }
+                when (xs) {
+                    is Nil -> z
+                    is Cons -> foldLeft(xs.tail, f(z, xs.head), f)
+                }
 
         fun <A, B> foldRightL(xs: List<A>, z: B, f: (A, B) -> B): B =
                 foldLeft(xs, { b: B -> b }) { g, a -> { g(f(a, it)) } }(z)
@@ -86,6 +86,42 @@ fun <A> List<A>.append(xs: List<A>): List<A> = List.foldRight(this, xs) { x, y -
 
 fun <A> List<List<A>>.concat(): List<A> = List.foldRight(this, List.empty()) { x, y -> x.append(y) }
 
+/**
+ * Exercise 3.15
+ *
+ * Write a function that transforms a list of integers by adding 1 to each element.
+ * This should be a pure function that returns a new List.
+ */
+fun List<Int>.increment(): List<Int> =
+        List.foldRight(this, List.empty()) { x, list -> Cons(x + 1, list) }
+
+/**
+ * Exercise 3.16
+ *
+ * Write a function that turns each value in a List<Double> into a String.
+ * You can use the expression d.toString() to convert some d: Double to a String.
+ */
+fun List<Double>.mapToString(): List<String> =
+        List.foldRight(this, List.empty()) { x, list -> Cons(x.toString(), list) }
+
+/**
+ * Exercise 3.17
+ *
+ * Write a function map that generalizes modifying each element in a list
+ * while maintaining the structure of the list.
+ */
+fun <A, B> List<A>.map(mapper: (A) -> B): List<B> =
+        List.foldRight(this, List.empty()) { x, acc -> Cons(mapper(x), acc) }
+
+/**
+ * Exercise 3.18
+ *
+ * Write a function filter that removes elements from a list unless they satisfy a given predicate.
+ * Use it to remove all odd numbers from a List<Int>.
+ */
+fun <A> List<A>.filter(predicate: (A) -> Boolean): List<A> =
+        List.foldRight(this, List.empty()) { x, acc -> if (predicate(x)) Cons(x, acc) else acc }
+
 object Nil : List<Nothing>()
 
 data class Cons<out A>(val head: A, val tail: List<A>) : List<A>()
@@ -104,4 +140,7 @@ fun main() {
     println(lists.concat())
 
     println(List.foldRightL(myList, "s") { x, s -> s + x })
+    println(myList.increment())
+    println(myList.map { it + 1 })
+    println(myList.filter { it % 2 == 0 })
 }
