@@ -122,6 +122,15 @@ fun <A, B> List<A>.map(mapper: (A) -> B): List<B> =
 fun <A> List<A>.filter(predicate: (A) -> Boolean): List<A> =
         List.foldRight(this, List.empty()) { x, acc -> if (predicate(x)) Cons(x, acc) else acc }
 
+/**
+ * Exercise 3.19
+ *
+ * Write a function flatMap that works like map except that the function given will return a list
+ * instead of a single result, and that list should be inserted into the final resulting list.
+ */
+fun <A, B> List<A>.flatMap(mapper: (A) -> List<B>): List<B> =
+        List.foldLeft(this, List.empty()) { acc, x -> acc.append(mapper(x)) }
+
 object Nil : List<Nothing>()
 
 data class Cons<out A>(val head: A, val tail: List<A>) : List<A>()
@@ -143,4 +152,5 @@ fun main() {
     println(myList.increment())
     println(myList.map { it + 1 })
     println(myList.filter { it % 2 == 0 })
+    println(myList.flatMap { List.of(it, it) })
 }
