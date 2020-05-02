@@ -131,6 +131,14 @@ fun <A> List<A>.filter(predicate: (A) -> Boolean): List<A> =
 fun <A, B> List<A>.flatMap(mapper: (A) -> List<B>): List<B> =
         List.foldLeft(this, List.empty()) { acc, x -> acc.append(mapper(x)) }
 
+/**
+ * Exercise 3.20
+ *
+ * Use flatMap to implement filter.
+ */
+fun <A> List<A>.filterWithFlatMap(predicate: (A) -> Boolean): List<A> =
+        this.flatMap { if (predicate(it)) List.of(it) else List.empty() }
+
 object Nil : List<Nothing>()
 
 data class Cons<out A>(val head: A, val tail: List<A>) : List<A>()
@@ -152,5 +160,6 @@ fun main() {
     println(myList.increment())
     println(myList.map { it + 1 })
     println(myList.filter { it % 2 == 0 })
+    println(myList.filterWithFlatMap { it % 2 == 0 })
     println(myList.flatMap { List.of(it, it) })
 }
