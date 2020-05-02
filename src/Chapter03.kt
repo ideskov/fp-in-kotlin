@@ -36,6 +36,18 @@ sealed class List<out A> {
         fun sum(ints: List<Int>): Int = foldRight(ints, 0) { a, b -> a + b }
 
         fun product(dbs: List<Double>): Double = foldRight(dbs, 1.0, { a, b -> a * b })
+
+        /**
+         * Exercise 3.21
+         *
+         * Write a function that accepts two lists and constructs a new list by adding corresponding elements.
+         */
+        fun add(x: List<Int>, y: List<Int>): List<Int> {
+            return when(x) {
+                is Nil -> Nil
+                is Cons -> if (y is Cons) Cons(x.head + y.head, add(x.tail, y.tail)) else x
+            }
+        }
     }
 }
 
@@ -162,4 +174,6 @@ fun main() {
     println(myList.filter { it % 2 == 0 })
     println(myList.filterWithFlatMap { it % 2 == 0 })
     println(myList.flatMap { List.of(it, it) })
+
+    println(List.add(List.of(1, 2, 3), List.of(4, 5, 6)))
 }
